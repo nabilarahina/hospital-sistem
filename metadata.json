@@ -1,0 +1,5 @@
+{
+  "name": "MediCoord AI System",
+  "description": "A React implementation of the Hospital Smart Agent System Blueprint, featuring an interactive Hospital System Coordinator and specialized sub-agents powered by Google Gemini.",
+  "requestFramePermissions": []
+}
