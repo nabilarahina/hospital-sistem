@@ -56,7 +56,9 @@ export const coordinateRequest = async (userQuery: string): Promise<CoordinatorR
     });
 
     if (response.text) {
-      return JSON.parse(response.text) as CoordinatorResponse;
+      // Clean up markdown blocks if present (e.g. ```json ... ```) to prevent parsing errors
+      const cleanText = response.text.replace(/```json|```/g, '').trim();
+      return JSON.parse(cleanText) as CoordinatorResponse;
     }
     throw new Error("Empty response from Coordinator");
   } catch (error) {
