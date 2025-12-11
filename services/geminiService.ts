@@ -2,14 +2,24 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { AgentRole, CoordinatorResponse } from "../types";
 
 // Initialize Gemini Client
-// CRITICAL: Using process.env.API_KEY as strictly requested.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Using a safe access pattern for process.env to prevent immediate module crash if polyfill is missing
+const apiKey = (typeof process !== 'undefined' && process.env) ? process.env.API_KEY : '';
+const ai = new GoogleGenAI({ apiKey: apiKey || 'DUMMY_KEY_TO_PREVENT_CRASH' });
 
 /**
  * The Coordinator Agent logic.
  * Analyzes input and outputs structured JSON for routing.
  */
 export const coordinateRequest = async (userQuery: string): Promise<CoordinatorResponse> => {
+  if (!apiKey) {
+    console.error("API_KEY is missing. Please configure it in your environment variables.");
+    return {
+      targetAgent: AgentRole.MEDICAL_INFO,
+      reasoning: "System Error: API Key missing. Mohon konfigurasi API Key.",
+      forwardedQuery: userQuery
+    };
+  }
+
   const modelId = "gemini-2.5-flash"; // Fast and capable for logic
 
   const systemInstruction = `
@@ -77,6 +87,8 @@ export const coordinateRequest = async (userQuery: string): Promise<CoordinatorR
  * Provides medical info based on strict guidelines.
  */
 export const getMedicalInformation = async (query: string): Promise<string> => {
+  if (!apiKey) return "Error: API Key is missing.";
+
   const modelId = "gemini-2.5-flash";
 
   const systemInstruction = `
@@ -115,6 +127,8 @@ export const getMedicalInformation = async (query: string): Promise<string> => {
  * Generic mock handler for other agents
  */
 export const getGenericAgentResponse = async (agentRole: string, query: string): Promise<string> => {
+  if (!apiKey) return "Error: API Key is missing.";
+
   const modelId = "gemini-2.5-flash";
   
   const systemInstruction = `
